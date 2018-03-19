@@ -127,6 +127,9 @@ void ScanDirectory(const std::string& l_Directory,
         }
         else
         { // If the found object is not a directory, add to filename vector
+          if (l_Filename.substr(l_Filename.length() - 4) == ".mkv"
+            || l_Filename.substr(l_Filename.length() - 4) == ".mp4"
+            || l_Filename.substr(l_Filename.length() - 4) == ".avi")
           l_FileList.push_back(l_Filename);
         }
       }
@@ -136,19 +139,19 @@ void ScanDirectory(const std::string& l_Directory,
 
     for (int i = 0; i < (int)l_FileList.size(); i++)
     {
-      std::size_t l_DashPos = l_FileList[i].find_first_of('-');
-      //std::size_t l_HPos = l_FullPath.find("h265");
+      std::size_t l_DashPos = l_FileList[i].find(" - ");
+
       if (l_DashPos != std::string::npos
         && l_FileList[i].substr(l_FileList[i].length() - 4) == ".mkv"
         || l_FileList[i].substr(l_FileList[i].length() - 4) == ".mp4"
         || l_FileList[i].substr(l_FileList[i].length() - 4) == ".avi")
       {
-        std::string l_CheckString = l_FileList[i].substr(0, l_DashPos + 8);
+        std::string l_CheckString = l_FileList[i].substr(0, l_DashPos + 9);
 
         for (int j = 0; j < (int)l_FileList.size(); j++)
         {
           
-          std::string l_OtherCheckString = l_FileList[j].substr(0, l_DashPos + 8);
+          std::string l_OtherCheckString = l_FileList[j].substr(0, l_DashPos + 9);
 
           if (i != j && l_CheckString == l_OtherCheckString)
           {
