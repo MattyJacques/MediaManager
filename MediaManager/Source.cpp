@@ -1,4 +1,4 @@
-// Description: List all files that are not encoded with x265 in a directory
+// Description: List all the duplicate episodes in a directory
 // Date: 04/03/2018
 // Author: Matthew Jacques
 
@@ -13,7 +13,7 @@
 
 #undef max // undef to use numeric_limits::max()
 
-const std::string OUTFILENAME = "FilesToEncode.txt";
+const std::string OUTFILENAME = "Duplicates.txt";
 
 void GetDirectoryFromUser(std::string* a_Directory)
 { // Prompt the user for the directory
@@ -94,6 +94,7 @@ void ScanDirectory(const std::string& l_Directory,
 
   WIN32_FIND_DATA l_FileData;               // Holds file data
   std::string l_FullDir = l_Directory;
+  std::vector<std::string> l_FileList;
   
   // Make sure we have a full path with wildcard
   if (l_FullDir.back() != '\\' && l_FullDir.back() != '/')
@@ -126,24 +127,37 @@ void ScanDirectory(const std::string& l_Directory,
         }
         else
         { // If the found object is not a directory, add to filename vector
-          std::size_t l_XPos = l_FullPath.find("x265");
-          std::size_t l_HPos = l_FullPath.find("h265");
-          if (l_XPos == std::string::npos
-            && l_HPos == std::string::npos
-            && l_FullPath.substr(l_FullPath.length() - 4) == ".mkv"
-            || l_FullPath.substr(l_FullPath.length() - 4) == ".mp4"
-            || l_FullPath.substr(l_FullPath.length() - 4) == ".avi")
-          {
-
-            std::cout << "Adding: " << l_Filename << std::endl;
-            l_Filenames->push_back(l_Filename);
-          }
+          l_FileList.push_back(l_Filename);
         }
       }
 
       // If another file found, do again
     } while (FindNextFile(l_FindHandle, &l_FileData));
 
+    for (int i = 0; i < (int)l_FileList.size(); i++)
+    {
+      std::size_t l_DashPos = l_FileList[i].find_first_of('-');
+      //std::size_t l_HPos = l_FullPath.find("h265");
+      if (l_DashPos != std::string::npos
+        && l_FileList[i].substr(l_FileList[i].length() - 4) == ".mkv"
+        || l_FileList[i].substr(l_FileList[i].length() - 4) == ".mp4"
+        || l_FileList[i].substr(l_FileList[i].length() - 4) == ".avi")
+      {
+        std::string l_CheckString = l_FileList[i].substr(0, l_DashPos + 8);
+
+        for (int j = 0; j < (int)l_FileList.size(); j++)
+        {
+          
+          std::string l_OtherCheckString = l_FileList[j].substr(0, l_DashPos + 8);
+
+          if (i != j && l_CheckString == l_OtherCheckString)
+          {
+            std::cout << "Adding: " << l_FileList[i] << std::endl;
+            l_Filenames->push_back(l_FileList[i]);
+          }
+        }
+      }
+    }
   } // if (findHandle != INVALID_HANDLE_VALUE)
 } // ScanDirectory()
 
